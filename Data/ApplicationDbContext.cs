@@ -15,7 +15,7 @@ namespace UserApiDotnet.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Configure model if necessary
+         
         }
     }
 }

@@ -32,7 +32,7 @@ namespace UserApiDotnet.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception details (if logging is configured)
+                
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -51,7 +51,7 @@ namespace UserApiDotnet.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception details (if logging is configured)
+                
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -71,7 +71,7 @@ namespace UserApiDotnet.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception details (if logging is configured)
+              
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -97,7 +97,7 @@ namespace UserApiDotnet.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception details (if logging is configured)
+             
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
