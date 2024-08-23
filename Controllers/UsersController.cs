@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UserApiDotnet.Models;
@@ -20,45 +21,106 @@ namespace UserApiDotnet.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _userRepository.GetAllUsersAsync();
-            return Ok(users);
+            try
+            {
+                var users = await _userRepository.GetAllUsersAsync();
+                if (users == null)
+                {
+                    return NotFound("No users found.");
+                }
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details (if logging is configured)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
-            var user = await _userRepository.GetUserByIdAsync(id);
-            if (user == null)
+            try
             {
-                return NotFound();
+                var user = await _userRepository.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound($"User with id {id} not found.");
+                }
+                return Ok(user);
             }
-            return Ok(user);
+            catch (Exception ex)
+            {
+                // Log the exception details (if logging is configured)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> AddUser(User user)
         {
-            await _userRepository.AddUserAsync(user);
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            try
+            {
+                if (user == null)
+                {
+                    return BadRequest("User object is null.");
+                }
+
+                await _userRepository.AddUserAsync(user);
+                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details (if logging is configured)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User user)
         {
-            if (id != user.Id)
+            try
             {
-                return BadRequest();
-            }
+                if (id != user.Id)
+                {
+                    return BadRequest("User ID mismatch.");
+                }
 
-            await _userRepository.UpdateUserAsync(user);
-            return NoContent();
+                var existingUser = await _userRepository.GetUserByIdAsync(id);
+                if (existingUser == null)
+                {
+                    return NotFound($"User with id {id} not found.");
+                }
+
+                await _userRepository.UpdateUserAsync(user);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details (if logging is configured)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
+
         public async Task<IActionResult> DeleteUser(int id)
         {
-            await _userRepository.DeleteUserAsync(id);
-            return NoContent();
+            try
+            {
+                var user = await _userRepository.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound($"User with id {id} not found.");
+                }
+
+                await _userRepository.DeleteUserAsync(id);
+                return Content($"User with id {id} has been successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }
