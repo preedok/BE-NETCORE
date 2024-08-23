@@ -26,7 +26,7 @@ namespace UserApiDotnet
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllers();
 
-            
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -55,14 +55,12 @@ namespace UserApiDotnet
             app.UseRouting();
             app.UseAuthorization();
 
-          
             app.UseSwagger();
 
-          
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
-                c.RoutePrefix = string.Empty;
+                c.RoutePrefix = string.Empty; 
             });
 
             app.UseEndpoints(endpoints =>
