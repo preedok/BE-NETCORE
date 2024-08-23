@@ -25,7 +25,21 @@ namespace UserApiDotnet
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllers();
+
+            // Add Swagger services
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "User API",
+                    Version = "v1",
+                    Description = "API for managing users"
+                });
+            });
         }
+
+
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -44,10 +58,23 @@ namespace UserApiDotnet
             app.UseRouting();
             app.UseAuthorization();
 
+            // Use Swagger
+            app.UseSwagger();
+
+            // Use Swagger UI
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
+                c.RoutePrefix = string.Empty; // Make Swagger UI available at the root URL
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
+
+
+
     }
 }
