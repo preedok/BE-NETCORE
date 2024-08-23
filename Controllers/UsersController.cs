@@ -6,8 +6,8 @@ using UserApiDotnet.Repositories;
 
 namespace UserApiDotnet.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
@@ -18,14 +18,14 @@ namespace UserApiDotnet.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
             var users = await _userRepository.GetAllUsersAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
             var user = await _userRepository.GetUserByIdAsync(id);
             if (user == null)
@@ -36,7 +36,7 @@ namespace UserApiDotnet.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        public async Task<IActionResult> AddUser(User user)
         {
             await _userRepository.AddUserAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);

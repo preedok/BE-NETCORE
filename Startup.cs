@@ -38,9 +38,6 @@ namespace UserApiDotnet
             });
         }
 
-
-
-
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -73,8 +70,6 @@ namespace UserApiDotnet
                 endpoints.MapControllers();
             });
         }
-
-
 
     }
 }
