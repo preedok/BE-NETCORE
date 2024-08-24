@@ -132,6 +132,8 @@ namespace UserApiDotnet.Controllers
             }
         }
 
+
+
         [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User user)

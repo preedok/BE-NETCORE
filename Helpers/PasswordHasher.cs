@@ -1,7 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-using BCrypt.Net;
-
 namespace UserApiDotnet.Helpers
 {
     public static class PasswordHasher
