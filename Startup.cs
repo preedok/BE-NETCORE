@@ -18,10 +18,14 @@ namespace UserApiDotnet
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Configure Entity Framework Core with PostgreSQL
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
+            // Register repositories
             services.AddScoped<IUserRepository, UserRepository>();
+
+            // Add controllers
             services.AddControllers();
 
             // Configure JWT authentication
@@ -54,15 +58,17 @@ namespace UserApiDotnet
                 };
             });
 
+            // Add authorization
             services.AddAuthorization();
 
+            // Configure Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
                 {
                     Title = "API NETCORE V8",
                     Version = "v1",
-                    Description = "API for managing CRUD"
+                    Description = "API for managing CRUD operations"
                 });
 
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -77,21 +83,20 @@ namespace UserApiDotnet
 
                 c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
                 {
-            {
-                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                {
-                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
                     {
-                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                        Id = "Bearer"
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
                     }
-                },
-                Array.Empty<string>()
-            }
                 });
             });
         }
-
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
