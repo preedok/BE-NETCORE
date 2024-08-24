@@ -42,7 +42,7 @@ namespace UserApiDotnet.Controllers
 
         private bool VerifyPassword(string password, string storedHash)
         {
-            // Menggunakan metode hash yang sesuai
+  
             return Helpers.PasswordHasher.VerifyHashedPassword(storedHash, password);
         }
 
@@ -119,10 +119,10 @@ namespace UserApiDotnet.Controllers
                     return BadRequest("User object is null.");
                 }
 
-                // Hash password sebelum menyimpan ke database
+         
                 user.PasswordHash = PasswordHasher.HashPassword(user.PasswordHash);
 
-                // ID tidak perlu diset, database akan menghasilkannya secara otomatis
+              
                 await _userRepository.AddUserAsync(user);
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }

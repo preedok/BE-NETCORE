@@ -6,10 +6,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace UserApiDotnet.Migrations
 {
-    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -32,7 +30,6 @@ namespace UserApiDotnet.Migrations
                 });
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

@@ -31,7 +31,6 @@ namespace UserApiDotnet.Repositories
 
         public async Task AddUserAsync(User user)
         {
-            // Tambahkan pengguna ke konteks dan simpan perubahan
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }

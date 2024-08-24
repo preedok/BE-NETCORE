@@ -34,7 +34,7 @@ namespace UserApiDotnet
                 });
             });
 
-            // Konfigurasi JWT
+        
             var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Key"]);
             services.AddAuthentication(x =>
             {
@@ -71,7 +71,7 @@ namespace UserApiDotnet
             app.UseStaticFiles();
             app.UseRouting();
 
-            app.UseAuthentication(); // Tambahkan ini untuk autentikasi JWT
+            app.UseAuthentication(); 
             app.UseAuthorization();
 
             app.UseSwagger();
