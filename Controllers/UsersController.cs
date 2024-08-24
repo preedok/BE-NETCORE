@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UserApiDotnet.Models;
 using UserApiDotnet.Repositories;
+using UserApiDotnet.Helpers; 
 
 namespace UserApiDotnet.Controllers
 {
@@ -26,11 +27,11 @@ namespace UserApiDotnet.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> Login([FromBody] Login loginRequest)
         {
             var user = await _userRepository.GetUserByEmailAsync(loginRequest.Email);
 
-            if (user == null || !VerifyPassword(loginRequest.Password, user.PasswordHash))
+            if (user == null || !PasswordHasher.VerifyHashedPassword(user.PasswordHash, loginRequest.Password))
             {
                 return Unauthorized("Invalid email or password.");
             }
@@ -38,10 +39,11 @@ namespace UserApiDotnet.Controllers
             var token = GenerateJwtToken(user);
             return Ok(new { token });
         }
+
         private bool VerifyPassword(string password, string storedHash)
         {
-            var hashedPassword = Helpers.PasswordHasher.HashPassword(password);
-            return hashedPassword == storedHash;
+            // Menggunakan metode hash yang sesuai
+            return Helpers.PasswordHasher.VerifyHashedPassword(storedHash, password);
         }
 
         private string GenerateJwtToken(User user)
@@ -108,7 +110,7 @@ namespace UserApiDotnet.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddUser(User user)
+        public async Task<IActionResult> AddUser([FromBody] User user)
         {
             try
             {
@@ -117,7 +119,10 @@ namespace UserApiDotnet.Controllers
                     return BadRequest("User object is null.");
                 }
 
-                user.PasswordHash = Helpers.PasswordHasher.HashPassword(user.PasswordHash);
+                // Hash password sebelum menyimpan ke database
+                user.PasswordHash = PasswordHasher.HashPassword(user.PasswordHash);
+
+                // ID tidak perlu diset, database akan menghasilkannya secara otomatis
                 await _userRepository.AddUserAsync(user);
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }
@@ -126,8 +131,6 @@ namespace UserApiDotnet.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-
 
         [Authorize]
         [HttpPut("{id}")]
