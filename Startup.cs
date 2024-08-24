@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using UserApiDotnet.Data;
 using UserApiDotnet.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace UserApiDotnet
 {
@@ -21,7 +24,6 @@ namespace UserApiDotnet
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddControllers();
 
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -30,6 +32,26 @@ namespace UserApiDotnet
                     Version = "v1",
                     Description = "API for managing CRUD"
                 });
+            });
+
+            // Konfigurasi JWT
+            var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Key"]);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
             });
         }
 
@@ -48,6 +70,8 @@ namespace UserApiDotnet
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+
+            app.UseAuthentication(); // Tambahkan ini untuk autentikasi JWT
             app.UseAuthorization();
 
             app.UseSwagger();
@@ -55,7 +79,7 @@ namespace UserApiDotnet
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "API NETCORE V8");
-                c.RoutePrefix = string.Empty; 
+                c.RoutePrefix = string.Empty;
             });
 
             app.UseEndpoints(endpoints =>
@@ -63,6 +87,5 @@ namespace UserApiDotnet
                 endpoints.MapControllers();
             });
         }
-
     }
 }

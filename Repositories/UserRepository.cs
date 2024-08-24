@@ -14,7 +14,10 @@ namespace UserApiDotnet.Repositories
         {
             _context = context;
         }
-
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
             return await _context.Users.ToListAsync();

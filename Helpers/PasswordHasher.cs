@@ -10,7 +10,13 @@ namespace UserApiDotnet.Helpers
             using (var sha256 = SHA256.Create())
             {
                 var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Encoding.UTF8.GetString(hashedBytes);
+                // Convert byte array to hexadecimal string
+                var sb = new StringBuilder();
+                foreach (var b in hashedBytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
             }
         }
     }

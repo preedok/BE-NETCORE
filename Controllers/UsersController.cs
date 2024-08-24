@@ -1,7 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 using UserApiDotnet.Models;
 using UserApiDotnet.Repositories;
 
@@ -12,12 +14,57 @@ namespace UserApiDotnet.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly IConfiguration _config;
 
-        public UsersController(IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository, IConfiguration config)
         {
             _userRepository = userRepository;
+            _config = config;
         }
 
+
+
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            var user = await _userRepository.GetUserByEmailAsync(loginRequest.Email);
+
+            if (user == null || !VerifyPassword(loginRequest.Password, user.PasswordHash))
+            {
+                return Unauthorized("Invalid email or password.");
+            }
+
+            var token = GenerateJwtToken(user);
+            return Ok(new { token });
+        }
+        private bool VerifyPassword(string password, string storedHash)
+        {
+            var hashedPassword = Helpers.PasswordHasher.HashPassword(password);
+            return hashedPassword == storedHash;
+        }
+
+        private string GenerateJwtToken(User user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(2),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+
+
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -32,11 +79,13 @@ namespace UserApiDotnet.Controllers
             }
             catch (Exception ex)
             {
-                
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
+
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
@@ -51,11 +100,13 @@ namespace UserApiDotnet.Controllers
             }
             catch (Exception ex)
             {
-                
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
+
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddUser(User user)
         {
@@ -66,16 +117,19 @@ namespace UserApiDotnet.Controllers
                     return BadRequest("User object is null.");
                 }
 
+                user.PasswordHash = Helpers.PasswordHasher.HashPassword(user.PasswordHash);
                 await _userRepository.AddUserAsync(user);
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }
             catch (Exception ex)
             {
-              
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
+
+
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User user)
         {
@@ -92,18 +146,28 @@ namespace UserApiDotnet.Controllers
                     return NotFound($"User with id {id} not found.");
                 }
 
+                if (!string.IsNullOrEmpty(user.PasswordHash))
+                {
+                    user.PasswordHash = Helpers.PasswordHasher.HashPassword(user.PasswordHash);
+                }
+                else
+                {
+                    user.PasswordHash = existingUser.PasswordHash;
+                }
+
                 await _userRepository.UpdateUserAsync(user);
                 return NoContent();
             }
             catch (Exception ex)
             {
-             
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpDelete("{id}")]
 
+
+        [Authorize]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             try
