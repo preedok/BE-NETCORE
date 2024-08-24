@@ -26,7 +26,14 @@ namespace UserApiDotnet
 
             // Configure JWT authentication
             var jwtSettings = Configuration.GetSection("Jwt");
-            var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]);
+            var key = jwtSettings["Key"];
+
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new InvalidOperationException("JWT key is not configured.");
+            }
+
+            var keyBytes = Encoding.ASCII.GetBytes(key);
 
             services.AddAuthentication(x =>
             {
@@ -40,7 +47,7 @@ namespace UserApiDotnet
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
@@ -70,20 +77,21 @@ namespace UserApiDotnet
 
                 c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
                 {
+            {
+                new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Reference = new Microsoft.OpenApi.Models.OpenApiReference
                     {
-                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                        {
-                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                            {
-                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
+                        Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                        Id = "Bearer"
                     }
+                },
+                Array.Empty<string>()
+            }
                 });
             });
         }
+
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
