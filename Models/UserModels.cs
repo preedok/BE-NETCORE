@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,6 +16,7 @@ namespace UserApiDotnet.Models
 
         [Required]
         [EmailAddress]
+        [StringLength(100)] // Adjust length if needed
         public string Email { get; set; } = string.Empty;
 
         [Required]
@@ -26,10 +28,10 @@ namespace UserApiDotnet.Models
         public string FirstName { get; set; } = string.Empty;
 
         [StringLength(50)]
-        public string LastName { get; set; } = string.Empty;
+        public string? LastName { get; set; } // Nullable if LastName is optional
 
         [Phone]
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; } // Nullable if PhoneNumber is optional
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
