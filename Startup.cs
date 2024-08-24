@@ -1,9 +1,4 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using UserApiDotnet.Data;
 using UserApiDotnet.Repositories;
 
@@ -31,9 +26,9 @@ namespace UserApiDotnet
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
                 {
-                    Title = "User API",
+                    Title = "API NETCORE V8",
                     Version = "v1",
-                    Description = "API for managing users"
+                    Description = "API for managing CRUD"
                 });
             });
         }
@@ -59,7 +54,7 @@ namespace UserApiDotnet
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "User API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API NETCORE V8");
                 c.RoutePrefix = string.Empty; 
             });
 

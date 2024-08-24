@@ -1,5 +1,3 @@
-using System;
-
 namespace UserApiDotnet.Models
 {
     public class User
@@ -13,7 +11,4 @@ namespace UserApiDotnet.Models
         public string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; }
     }
-
-
-
 }
