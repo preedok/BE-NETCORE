@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using UserApiDotnet.Models;
 using UserApiDotnet.Repositories;
-using UserApiDotnet.Helpers; 
+using UserApiDotnet.Helpers;
 
 namespace UserApiDotnet.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -22,8 +23,6 @@ namespace UserApiDotnet.Controllers
             _userRepository = userRepository;
             _config = config;
         }
-
-
 
         [AllowAnonymous]
         [HttpPost("login")]
@@ -40,16 +39,10 @@ namespace UserApiDotnet.Controllers
             return Ok(new { token });
         }
 
-        private bool VerifyPassword(string password, string storedHash)
-        {
-  
-            return Helpers.PasswordHasher.VerifyHashedPassword(storedHash, password);
-        }
-
         private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]); // Pastikan ini panjangnya cukup
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
@@ -65,7 +58,6 @@ namespace UserApiDotnet.Controllers
         }
 
 
-
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
@@ -73,7 +65,7 @@ namespace UserApiDotnet.Controllers
             try
             {
                 var users = await _userRepository.GetAllUsersAsync();
-                if (users == null)
+                if (users == null || !users.Any())
                 {
                     return NotFound("No users found.");
                 }
@@ -107,8 +99,7 @@ namespace UserApiDotnet.Controllers
         }
 
 
-
-        [Authorize]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AddUser([FromBody] User user)
         {
@@ -119,16 +110,23 @@ namespace UserApiDotnet.Controllers
                     return BadRequest("User object is null.");
                 }
 
-         
+                // Set CreatedAt if not provided
+                if (user.CreatedAt == default)
+                {
+                    user.CreatedAt = DateTime.UtcNow;
+                }
+
+                // Hash the password before saving
                 user.PasswordHash = PasswordHasher.HashPassword(user.PasswordHash);
 
-              
+                // Add user to repository
                 await _userRepository.AddUserAsync(user);
+
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}\n{ex.InnerException?.Message}");
             }
         }
 
@@ -136,7 +134,7 @@ namespace UserApiDotnet.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User user)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] User user)
         {
             try
             {
@@ -153,7 +151,7 @@ namespace UserApiDotnet.Controllers
 
                 if (!string.IsNullOrEmpty(user.PasswordHash))
                 {
-                    user.PasswordHash = Helpers.PasswordHasher.HashPassword(user.PasswordHash);
+                    user.PasswordHash = PasswordHasher.HashPassword(user.PasswordHash);
                 }
                 else
                 {

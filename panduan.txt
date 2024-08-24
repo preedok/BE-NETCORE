@@ -5,8 +5,21 @@ running project auto reload = dotnet watch run
 swagger = http://localhost:5190/index.html
 
 
-
+login
 {
-  "email": "rizky@gmail.com",
+  "email": "dodo@gmail.com",
   "password": "abc123"
 }
+
+add
+{
+  "id": 0,
+  "username": "dodo",
+  "email": "dodo@gmail.com",
+  "passwordHash": "abc123",
+  "firstName": "do",
+  "lastName": "string",
+  "phoneNumber": "082180044396",
+  "createdAt": "2024-08-24T01:36:21.480Z"
+}
+
